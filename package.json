@@ -1,6 +1,6 @@
 {
   "name": "between-lines-extension",
-  "version": "2.1.0",
+  "version": "2.2.1",
   "private": true,
   "type": "module",
   "scripts": { "build": "node build.mjs", "test": "node --test test/*.test.mjs" }

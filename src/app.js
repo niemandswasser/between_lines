@@ -1,6 +1,6 @@
 class BetweenLinesApp {
   constructor(environment, core, style) {
-    this.env = environment; this.core = core; this.style = style; this.version = '2.1.0';
+    this.env = environment; this.core = core; this.style = style; this.version = '2.2.1';
     this.search = ''; this.scope = 'all'; this.category = 'all'; this.selected = null;
     this.expanded = new Map(); this.epoch = 0; this.status = 'Справочник по вашему миру';
   }
@@ -75,7 +75,16 @@ class BetweenLinesApp {
   }
   schedulePaint() { clearTimeout(this.paintTimer); this.paintTimer = setTimeout(() => this.refresh(), 90); }
   refresh() {
-    const c = this.context(); this.ledger = this.core.readCodex(c.chat || []); this.prefs = this.settings();
+    const c = this.context(), upgraded = this.core.upgradeCodexRecords(c.chat || []);
+    if (upgraded && this.hasChat()) this.env.recordsUpgraded?.();
+    this.ledger = this.core.readCodex(c.chat || []); this.prefs = this.settings();
+    let recoveredPreferences = false;
+    for (const article of this.ledger.articles) for (const oldId of article.recoveredIds || []) {
+      if (this.prefs.favorites.includes(oldId) && !this.prefs.favorites.includes(article.id)) { this.prefs.favorites.push(article.id); recoveredPreferences = true; }
+      const note = this.prefs.notes[oldId];
+      if (note && !String(this.prefs.notes[article.id] || '').includes(note)) { this.prefs.notes[article.id] = [this.prefs.notes[article.id], note].filter(Boolean).join('\n\n'); recoveredPreferences = true; }
+    }
+    if (recoveredPreferences) this.saveSettings(this.prefs);
     if (!this.ledger.articles.some(article => article.id === this.selected)) this.selected = this.ledger.articles[0]?.id || null;
     if (this.menu) this.menu.hidden = !this.enabled();
     if (this.dialog) {

@@ -3,6 +3,18 @@
 </style></head><body><div id="extensionsMenu"></div><header class="demo-heading"><small>ПЕПЕЛЬНЫЙ ПРЕДЕЛ / ГЛАВА I</small><h1>Город, который помнит</h1><p>Соляная пристань · Поздний вечер</p></header><main id="chat"><article class="mes" mesid="0"><div class="mes_text">Приветствие.</div></article><article class="mes" mesid="1"><div class="mes_text">Я останавливаюсь перед воротами. «Мы ещё успеем пройти?»</div></article><article class="mes" mesid="2"><div class="mes_block"><div class="mes-author"><span>Э</span><div>Элиан Восс<small>Тот, кто знает короткие дороги</small></div></div><div class="mes_text"><p>Элиан придержал вас за локоть прежде, чем вы ступили под арку. Над Соляными воротами качался фонарь; его свет скользил по лицам людей в пепельных плащах.</p><p>— Успеем, если не станем спорить с Серым дозором, — негромко ответил он. — Знак держите на виду. И не трогайте нить на боковой двери. Красная печать здесь означает, что у двери уже есть хозяин — город.</p><p><em>Он поправил ремень сумки и шагнул в короткую очередь. Дозорный у калитки поднял голову.</em></p></div></div></article><p class="fixture-badge">Проверка реальных блоков · ответы модели заменены демонстрационными</p></main><script type="module">
 const callbacks=new Map();
 window.fixture={calls:0,saves:0,metadataSaves:0,notifications:[],ready:false};
+// Tokenization is local to the test fixture; model responses remain mocked below.
+const originalFetch = window.fetch.bind(window);
+window.fetch = async (url, options) => {
+  if (String(url).startsWith('/api/tokenizers/')) {
+    const body = JSON.parse(options.body), chat = Array.isArray(body);
+    const count = Math.ceil((chat ? JSON.stringify(body).length : body.text.length) / 4);
+    fixture.tokenizerCalls = (fixture.tokenizerCalls || 0) + 1;
+    fixture.tokenizerModel = new URL(url, location.origin).searchParams.get('model');
+    return new Response(JSON.stringify(chat ? { token_count: count } : { count }), { headers: { 'Content-Type': 'application/json' } });
+  }
+  return originalFetch(url, options);
+};
 const eventTypes=Object.fromEntries(['CHAT_CHANGED','MESSAGE_SWIPED','MESSAGE_EDITED','MESSAGE_UPDATED','MESSAGE_DELETED','CHARACTER_MESSAGE_RENDERED','GENERATION_STARTED','GENERATION_ENDED','GENERATION_STOPPED','CONNECTION_PROFILE_UPDATED','CONNECTION_PROFILE_DELETED'].map(name=>[name,name]));
 window.ctx={name2:'Элиан Восс',characterId:0,chatId:'between-lines-fixture',getCurrentChatId:()=>ctx.chatId,chat:[...document.querySelectorAll('.mes')].map((element,index)=>({mes:element.querySelector('.mes_text').textContent,is_user:index===1,name:index===1?'Player':'Элиан Восс',...(index===2?{swipe_id:0,swipes:[element.querySelector('.mes_text').textContent,'Другой ответ.'],extra:{extblocks:'untouched'}}:{})})),chatMetadata:{},extensionSettings:{ExtBlocks:{extblocks_is_enabled:true}},eventTypes,eventSource:{on:(name,fn)=>{const list=callbacks.get(name)||[];list.push(fn);callbacks.set(name,list);}},saveMetadataDebounced:()=>fixture.metadataSaves++,saveChat:async()=>{fixture.saves++;if(fixture.saveFail)throw Error('Mock save failure');}};
 window.emit=async(name,...args)=>{for(const fn of callbacks.get(name)||[])await fn(...args);};

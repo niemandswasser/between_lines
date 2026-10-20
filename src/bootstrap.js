@@ -34,6 +34,7 @@ export function startBetweenLines({ context, service }) {
   const env = { context, connection, request: (operation, input) => connection.request(operation, input), isEnabled: () => connection.settings().enabled,
     resetAutoCollection: () => saveAutoState({ every: CORE.preferences(context().chatMetadata?.[CORE.PREFERENCES]).autoEvery, frames: [] }),
     collectionSaved: target => saveAutoState(CORE.markAutoCollected(context().chat, target, context().chatMetadata?.[CORE.AUTO_STATE], CORE.preferences(context().chatMetadata?.[CORE.PREFERENCES]).autoEvery)),
+    recordsUpgraded: () => { void context().saveChat().catch(error => globalThis.toastr?.warning('Не удалось сохранить совместимость старых записей: ' + error.message, 'Между строк')); },
   };
   const app = new BetweenLinesApp(env, CORE, STYLES); app.nativeExtension = true;
   globalThis.__betweenLinesApp = app; app.mount(); app.setupExtensionSettings();

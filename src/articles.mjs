@@ -43,7 +43,7 @@ export function questionTopic(question) {
 
 export function questionInput(chat, anchor, known, settings, question) {
   if (typeof question !== 'string' || !question.trim() || question.trim().length > 300 || !questionTopic(question)) throw Error('Введите термин или вопрос, до 300 символов.');
-  return { ...collectionInput(chat, anchor, known, settings), question: question.trim(), topic: questionTopic(question) };
+  return { ...collectionInput(chat, anchor, known, settings, question), question: question.trim(), topic: questionTopic(question) };
 }
 
 export function decodeQuestion(raw, input) {

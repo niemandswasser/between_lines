@@ -1,11 +1,12 @@
 import { trimmed, hash, collectionInput, collectionProfile } from './core.mjs';
+import { compactWritingTopic } from './context.mjs';
 
 export const WRITING_FORMS = { auto: 'Подобрать по теме', diary: 'Страница дневника', letter: 'Письмо', article: 'Статья / трактат', overheard: 'Подслушанный разговор', chronicle: 'Хроника', report: 'Донесение', legend: 'Легенда / предание', book: 'Книжный отрывок' };
 
 export function writingInput(chat, anchor, topic, settings, { form = 'auto', request = '' } = {}) {
   return {
     profile: collectionProfile(settings),
-    topic: { id: topic.id, name: topic.name, category: topic.category, definition: topic.definition, details: topic.details, knowledge: topic.knowledge, facts: topic.facts, previousPages: (topic.pages || []).map(page => ({ title: page.title, form: page.form, opening: page.body.slice(0, 600) })) },
+    topic: compactWritingTopic(topic, request),
     form: Object.hasOwn(WRITING_FORMS, form) ? form : 'auto', request: trimmed(request, 1200),
     messages: collectionInput(chat, anchor, [], { ...settings, window: Math.min(settings.window || 12, 8) }).messages,
   };
