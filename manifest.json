@@ -1,0 +1,13 @@
+{
+  "display_name": "Между строк · Кодекс",
+  "loading_order": 104,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "niemandswasser",
+  "version": "2.1.0",
+  "auto_update": false,
+  "homePage": "https://github.com/niemandswasser/between_lines",
+  "description": "Самостоятельный кодекс мира: статьи, термины и голоса мира с выбором профиля подключения."
+}
